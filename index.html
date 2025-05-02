@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Solace</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-light: #f4f4f9;
+      --bg-dark: #1e1e2f;
+      --text-light: #333;
+      --text-dark: #eee;
+      --primary: #4a90e2;
+      --bot-bubble-light: #f1e7ff;
+      --user-bubble-light: #d4ecf7;
+      --bot-bubble-dark: #3a3a4d;
+      --user-bubble-dark: #2e4b5f;
+      --accent: #e65b5b;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px 20px;
+      font-family: 'Quicksand', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    body.dark {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      color: var(--primary);
+      margin: 0;
+    }
+
+    h2 {
+      font-weight: normal;
+      margin-top: 5px;
+      font-size: 1.1rem;
+      color: #666;
+    }
+
+    body.dark h2 {
+      color: #ccc;
+    }
+
+    #chat-box {
+      width: 100%;
+      max-width: 680px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin: 30px 0;
+      overflow-y: auto;
+      max-height: 480px;
+      transition: background 0.3s ease;
+    }
+
+    body.dark #chat-box {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .user, .bot {
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      border-radius: 16px;
+      font-size: 1rem;
+      line-height: 1.5;
+      max-width: 85%;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .user {
+      background-color: var(--user-bubble-light);
+      margin-left: auto;
+      text-align: right;
+      color: var(--text-light);
+    }
+
+    .bot {
+      background-color: var(--bot-bubble-light);
+      margin-right: auto;
+      text-align: left;
+      color: var(--text-light);
+    }
+
+    body.dark .user {
+      background-color: var(--user-bubble-dark);
+      color: var(--text-dark);
+    }
+
+    body.dark .bot {
+      background-color: var(--bot-bubble-dark);
+      color: var(--text-dark);
+    }
+
+    .typing {
+      font-style: italic;
+      color: #888;
+    }
+
+    .typing span {
+      animation: blink 1.4s infinite;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+
+    .input-area {
+      display: flex;
+      width: 100%;
+      max-width: 680px;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    button {
+      padding: 14px 20px;
+      font-size: 1rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #357ac9;
+    }
+
+    .toggle-theme {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.5s ease;
+    }
+
+    .toggle-theme:hover {
+      background-color: #326fbb;
+    }
+
+    @media (max-width: 700px) {
+      #chat-box {
+        max-height: 60vh;
+      }
+
+      .input-area {
+        flex-direction: column;
+      }
+
+      input[type="text"], button {
+        width: 100%;
+        margin: 6px 0;
+      }
+
+      .toggle-theme {
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="toggle-theme" onclick="toggleTheme()">Toggle Mode</button>
+
+  <h1>Solace</h1>
+  <h2>Your feelings matter ❤️</h2>
+
+  <div id="chat-box"></div>
+
+  <div class="input-area">
+    <input type="text" id="user-input" placeholder="What's on your mind?" />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+<script>
+  const inputField = document.getElementById("user-input");
+  const sendButton = document.querySelector("button");
+  let isBotTyping = false;
+
+  function toggleTheme() {
+    document.body.classList.toggle("dark");
+  }
+
+  function appendMessage(role, text) {
+    const chatBox = document.getElementById("chat-box");
+    const message = document.createElement("div");
+    message.className = role;
+    message.textContent = text;
+    chatBox.appendChild(message);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    return message;
+  }
+
+  function showTyping() {
+    const chatBox = document.getElementById("chat-box");
+    const typing = document.createElement("div");
+    typing.className = "bot typing";
+    typing.innerHTML = `typing<span>.</span><span>.</span><span>.</span>`;
+    chatBox.appendChild(typing);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    return typing;
+  }
+
+  async function sendMessage() {
+    const text = inputField.value.trim();
+    if (!text || isBotTyping) return;
+
+    appendMessage("user", text);
+    inputField.value = "";
+    inputField.disabled = true;
+    sendButton.disabled = true;
+    isBotTyping = true;
+
+    const typingIndicator = showTyping();
+
+    try {
+      const res = await fetch("/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await res.json();
+      typingIndicator.remove();
+      appendMessage("bot", data.response);
+    } catch (err) {
+      typingIndicator.remove();
+      appendMessage("bot", "Something went wrong. Please try again.");
+    } finally {
+      isBotTyping = false;
+      inputField.disabled = false;
+      sendButton.disabled = false;
+      inputField.focus();
+    }
+  }
+
+  inputField.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") sendMessage();
+  });
+</script>
+</body>
+</html>
